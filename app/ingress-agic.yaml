@@ -1,0 +1,49 @@
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend-ingress
+  annotations:
+    kubernetes.io/ingress.class: azure/application-gateway
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    appgw.ingress.kubernetes.io/backend-path-prefix: "/"
+spec:
+  tls:
+  - hosts:
+    - app.jcavitreinamentos.net
+    secretName: tls-service-frontend
+  rules:
+  - host: app.jcavitreinamentos.net
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: contoso-ship-manager-frontend
+            port:
+              number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingres-backend
+  annotations:
+    kubernetes.io/ingress.class: addon-http-application-routing
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+  - hosts:
+    - backend.jcavitreinamentos.net
+    secretName: tls-service-back
+  rules:
+  - host: backend.jcavitreinamentos.net
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service: 
+            name: ship-manager-backend
+            port: 
+              number: 80

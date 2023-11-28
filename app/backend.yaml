@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ship-manager-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ship-manager-backend
+  template:
+    metadata:
+      labels:
+        app: ship-manager-backend
+    spec:
+      containers:
+        - image: mcr.microsoft.com/mslearn/samples/contoso-ship-manager:backend
+          name: ship-manager-backend
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          ports:
+            - containerPort: 3000
+              name: http
+          env:
+            - name: DATABASE_MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  key: database_mongodb_uri
+                  name: backend-db
+            - name: DATABASE_MONGODB_DBNAME
+              value: ship_manager
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ship-manager-backend
+spec:
+  selector:
+    app: ship-manager-backend
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3000
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: backend-db
+type: Opaque
+stringData:
+  database_mongodb_uri: mongodb://adminuser:password123@mongodb.jcavitreinamentos.net/?authMechanism=DEFAULT
